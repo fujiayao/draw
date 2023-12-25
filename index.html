@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运大转盘</title>
+</head>
+<body style="background-image: url('back.jpg'); background-size: cover; background-repeat: no-repeat;">
+    <div id="big-cube"></div>
+    <button id="go-go">抽奖</button>
+</body>
+<style>
+    #big-cube{
+        width: 350px;
+        height: 350px;
+    }
+    .prize{
+        width: 100px;
+        height: 100px;
+        border: 1px solid #999;
+        margin: 5px;
+        text-align: center;
+        line-height: 100px;
+        float: left;
+        border-radius: 8px;
+		 color: red;
+    }
+    .noting{
+        border: 1px solid #bbb;
+        color: red;
+    }
+    #prize-title{
+        color: #666;
+        font-weight: 300;
+        font-size: 1.1rem;
+        background: #fbd4aa;
+        font-style: oblique;
+        border: none;
+		 color: red;
+    }
+</style>
+<script>
+    //预设奖品
+     var default_my_prize = 2;
+    var setTime;
+    var cycle = [0,1,2,5,8,7,6,3];
+    var prizeList = [
+        {name:"20元", isPrize:true},
+        {name:"一束玫瑰", isPrize:true},
+        {name:"美甲充值卡", isPrize:true},
+        {name:"100元", isPrize:true},
+        {name:"幸运大转盘", isPrize:true, id:"prize-title"},
+        {name:"200元", isPrize:true},
+        {name:"烛光晚餐", isPrize:true},
+        {name:"50元", isPrize:true},
+        {name:"金华一日游", isPrize:true},
+    ];
+    document.getElementById('go-go').onclick = function(){
+        if(setTime){
+            return false;
+        }
+        var index = 0;
+        var count = 0;
+        var my_prize = document.getElementsByClassName('prize'); //获得所有的跑马灯奖品
+        for(let i=0; i<my_prize.length; i++){
+            my_prize[i].style.background = '';
+            my_prize[i].style.color = '';
+        }
+        //定时器开始
+        setTime = setInterval(function(){
+            //从第二个跑马灯开始，每走一个跑马灯就把上一个跑马灯的颜色恢复白色
+            if(index>0){
+                my_prize[cycle[index-1]].style.background = '';
+                my_prize[cycle[index-1]].style.color = '';
+            }
+ 
+            //跑完最后一个跑马灯又从第一个重新开始跑
+            // if(index > (my_prize.length-1)){
+            if(index > 7){
+                index = 0;
+            }
+ 
+            //跑到哪个跑马灯就把哪个变为红色背景
+            my_prize[cycle[index]].style.background = '#e6722aab';
+            my_prize[cycle[index]].style.color = 'white';
+ 
+            //当前跑的跑马灯的下标+1
+            index++;
+ 
+            //总计数器+1
+            count++;
+ 
+            //有预设奖品
+            if(typeof default_my_prize!='undefined'){
+                
+                //至少跑35下，跑到预设的奖品就停下
+                if(count>40 && (index-1)==default_my_prize){
+                    clearInterval(setTime); //清除定时器
+                    
+                    //弹出中奖提示
+                    if(my_prize[cycle[index-1]].className=='prize'){
+                        setTimeout(()=>{alert('恭喜你抽中了['+my_prize[cycle[index-1]].innerHTML+']')},100);
+                    }
+                    setTime = undefined;
+                }
+                //中断程序运行，防止走预设奖品后的代码
+                return false;
+            }
+ 
+            //没有预设奖品的算法，跑15次后随机获得奖品
+            if(count>40 && parseInt(Math.random()*10)>8 ){
+                clearInterval(setTime);
+                //弹出奖品的时候排除掉谢谢惠顾
+                if(my_prize[cycle[index-1]].className=='prize'){
+                    setTimeout(()=>{alert('恭喜你抽中了['+my_prize[cycle[index-1]].innerHTML+']')},100);
+                }
+                setTime = undefined;
+            }
+        }, 90);
+    }
+ 
+    function createPrizeItem(prizeList){
+        //删除所有奖品节点
+        document.querySelectorAll('.prize').forEach(function(e){ 
+            e.remove();
+        })
+ 
+        var prizeBox = document.getElementById('big-cube');
+        //循环创建奖品节点
+        for(let list of prizeList){
+            var ele = document.createElement('div');
+            ele.innerHTML = list.name ?? '谢谢参与';
+            ele.className = list.isPrize? 'prize' : 'prize noting';
+            if(list.id){
+                ele.id = list.id;
+            }
+            prizeBox.append(ele);
+        }
+    }
+    createPrizeItem(prizeList);
+</script>
+</html>
